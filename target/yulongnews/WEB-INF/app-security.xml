@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:security="http://www.springframework.org/schema/security"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                 http://www.springframework.org/schema/security
+                 http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <security:http pattern="/public/**" security="none"/>
+    <security:http pattern="/auth/login.jsp*" security="none"/>
+    <security:http pattern="/auth/denied.jsp" security="none"/>
+
+    <security:http auto-config="false" access-denied-page="/auth/denied">
+    	<security:session-management invalid-session-url="/login">
+        </security:session-management>
+        <security:form-login login-page="/login" authentication-failure-url="/login?error=1" default-target-url="/user/getList"/>
+        <security:logout invalidate-session="true" logout-success-url="/index" delete-cookies="JSESSIONID"/>
+        <security:intercept-url pattern="/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/j_spring_security_check" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/admin/**" access="ROLE_ADMIN"/>
+        <security:intercept-url pattern="/common/**" access="ROLE_USER"/>
+    </security:http>
+
+    <security:authentication-manager>
+		<security:authentication-provider user-service-ref="customUserDetailsService">
+        	<security:password-encoder ref="passwordEncoder"/>
+		</security:authentication-provider>
+    </security:authentication-manager>
+    
+	<bean class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" id="passwordEncoder"/>
+ 	<!-- A custom service where Spring will retrieve users and their corresponding access levels  -->
+ 	<bean id="customUserDetailsService" class="com.yulong.news.controller.auth.CustomUserDetailsService"/>
+</beans>
